@@ -1,13 +1,15 @@
 package entities;
 
-import entities.CurrentAccount;
-import entities.SavingsAccount;
+import java.util.Collections;
+import java.util.List;
 
 public class Customer {
 
     private String fName;
     private String lName;
     private String email;
+    private String saving_file_name;
+    private String current_file_name;
     public SavingsAccount savings;
     public CurrentAccount current;
 
@@ -17,8 +19,11 @@ public class Customer {
         this.lName = output[1];
         this.email = output[2];
 
-        this.current = new CurrentAccount(output[3]);
-        this.savings = new SavingsAccount(output[3]);
+        this.saving_file_name = output[3];
+        this.current_file_name = output[4];
+
+        this.current = new CurrentAccount(this.saving_file_name);
+        this.savings = new SavingsAccount(this.current_file_name);
 
     }
 
@@ -85,6 +90,28 @@ public class Customer {
         this.current = current;
     }
 
+    public void deleteFiles() {
+        new ManageFileTXT(this.saving_file_name).deleteFile();
+        new ManageFileTXT(this.current_file_name).deleteFile();
+    }
 
+    public void destroy(){
+        ManageFileTXT savingReader = new ManageFileTXT(this.saving_file_name);
+        ManageFileTXT currentReader = new ManageFileTXT(this.current_file_name);
+        List<String> savinglist = new java.util.ArrayList<>(Collections.emptyList());
+        List<String> currentlist = new java.util.ArrayList<>(Collections.emptyList());
+        for (Transaction transaction: this.savings.tHistory.getTransactions()){
+            savinglist.add(transaction.toString());
+        }
+        for (Transaction transaction: this.current.tHistory.getTransactions()){
+            currentlist.add(transaction.toString());
+        }
+        savingReader.write(savinglist);
+        currentReader.write(currentlist);
+    }
+
+    public String toString(){
+        return String.format("%s;%s;%s;%s;%s", this.fName, this.lName, this.email, this.saving_file_name, this.current_file_name);
+    }
 
 }

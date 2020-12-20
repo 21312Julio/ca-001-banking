@@ -4,14 +4,11 @@ import entities.BankEmployee;
 import entities.Customer;
 import entities.ManageFileTXT;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import javax.naming.AuthenticationException;
-import javax.naming.OperationNotSupportedException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
 
 
 public class EmployeeView {
@@ -33,106 +30,83 @@ public class EmployeeView {
     public void login () throws AuthenticationException {
         BankEmployee employee = new BankEmployee();
         System.out.print("Please enter your PIN: ");
-        String employeePin = sc.nextLine();
-        if (employeePin.equals(employee.getPIN())) {
-            return True;
+        String employeePin = this.sc.nextLine();
+        if (!employeePin.equals(employee.getPIN())) {
+            throw new AuthenticationException("Unauthorized - please try again");
         }
-        throw new AuthenticationException("Unauthorized - please try again");
     }
 
-    public void main_menu(){
+    public void main_menu() throws AuthenticationException {
         System.out.println("Do you wish to:");
         System.out.println("1) Create Customer");
         System.out.println("2) Delete Customer");
         System.out.println("3) Create Transaction");
         System.out.println("4) Pull customers list");
         System.out.print("Option: ");
-        int option = sc.nextInt();
+        int option = this.sc.nextInt();
         if (option == 1){
-            this.transaction();
+            this.create_customer();
         }
         else if (option == 2){
-            this.history();
+            this.delete_customer();
+        }
+        else if (option == 3){
+            this.create_transaction();
+        }
+        else if (option == 4){
+            this.print_customers();
         }
     }
 
     private void create_customer() {
-        sc.nextLine();
         System.out.print("First name of customer: ");
-        String fName = sc.nextLine();
+        String fName = this.sc.nextLine();
         System.out.print("Last name of customer: ");
-        String lName = sc.nextLine();
+        String lName = this.sc.nextLine();
         System.out.print("Email of customer: ");
-        String email = sc.nextLine();
+        String email = this.sc.nextLine();
         Customer customer = new Customer(fName, lName, email);
         this.list_of_costumers.add(customer);
     }
 
     private void delete_customer() {
         System.out.print("First name of customer: ");
-        String fName = sc.nextLine();
+        String fName = this.sc.nextLine();
         System.out.print("Last name of customer: ");
-        String lName = sc.nextLine();
-        System.out.print("Email of customer: ");
-        String email = sc.nextLine();
-        Customer customer = new Customer(fName, lName, email);
-        this.list_of_costumers.remove(customer);
-        customerReader.deleteFiles();
-    }
-
-    private void create_transaction() {
-        System.out.print("Inform the informations for the chosen customer: ");
-        System.out.print("Please enter first name: ");
-        String fName = sc.nextLine();
-        System.out.print("Please enter last name: ");
-        String lName = sc.nextLine();
-        System.out.print("Please enter account number: ");
-        String accountNumber = sc.nextLine();
-        System.out.print("Please enter PIN number: ");
-        String pin = sc.nextLine();
+        String lName = this.sc.nextLine();
+        System.out.print("Please enter the account number: ");
+        String accountNumber = this.sc.nextLine();
+        System.out.print("Please enter the PIN number: ");
+        String pin = this.sc.nextLine();
         for (Customer customer : this.list_of_costumers) {
             if (customer.has_the_same_attributes(fName, lName, pin, accountNumber)) {
-                Customer customerAuth = customer;
-                System.out.print("Do you wish to access the customers savings or current account: ");
-                String acc = sc.nextLine();
-                if (acc.equals("savings")) {
-                    System.out.print("Withdraw or Deposit: ");
-                    String op = sc.nextLine();
-                    if (op.equals("withdraw")) {
-                        System.out.print("Amount: ");
-                        double amount = sc.nextDouble();
-                        customerAuth.savings.withdraw(amount);
-                    }
-                    if (op.equals("deposit")) {
-                        System.out.println("Amount: ");
-                        double amount = sc.nextDouble();
-                        customerAuth.savings.deposit(amount);
-                    }
-                } else if (acc.equals("current")) {
-                    System.out.print("Withdraw or Deposit: ");
-                    String op = sc.nextLine();
-                    if (op.equals("withdraw")) {
-                        System.out.print("Amount: ");
-                        double amount = sc.nextDouble();
-                        customerAuth.current.withdraw(amount);
-                    }
-                    if (op.equals("deposit")) {
-                        System.out.println("Amount: ");
-                        double amount = sc.nextDouble();
-                        customerAuth.current.deposit(amount);
-                    }
-                } else {
-                    throw new OperationException("Please enter valid type of account (savings/current).");
-                }
+                customer.deleteFiles();
+                this.list_of_costumers.remove(customer);
             }
         }
-        System.out.println("Some of the informations above are incorrect, sorry.");
+    }
+
+    private void create_transaction() throws AuthenticationException {
+        CustomerView cview = new CustomerView();
+        cview.login();
+        cview.transaction();
     }
 
     private void print_customers() {
 
-        for (String x : list) {
-            System.out.println(x);
+        for (Customer x : this.list_of_costumers) {
+            System.out.println(x.getfName());
         }
+    }
+
+    public void destroy()
+    {
+        ManageFileTXT customerReader = new ManageFileTXT();
+        List<String> list = new java.util.ArrayList<>(Collections.emptyList());
+        for (Customer customer: this.list_of_costumers){
+            customer.destroy();
+            list.add(customer.toString());
+        }
+        customerReader.write(list);
     }
 }

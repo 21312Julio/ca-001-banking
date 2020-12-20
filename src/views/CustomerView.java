@@ -9,6 +9,7 @@ import constants.OperationType;
 
 import javax.naming.AuthenticationException;
 import javax.naming.OperationNotSupportedException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -29,7 +30,7 @@ public class CustomerView{
         }
     }
 
-    public Boolean login() throws AuthenticationException {
+    public void login() throws AuthenticationException {
         System.out.print("Please enter your first name: ");
         String fName = this.sc.nextLine();
         System.out.print("Please enter your last name: ");
@@ -41,10 +42,12 @@ public class CustomerView{
         for (Customer customer : this.list_of_costumers) {
             if (customer.has_the_same_attributes(fName, lName, pin, accountNumber)) {
                 this.customer = customer;
-                return true;
+                break;
             }
         }
-        throw new AuthenticationException("Unauthorized - please try again");
+        if (!(this.customer == null)){
+            throw new AuthenticationException("Unauthorized - please try again");
+        }
     }
 
     public void main_menu() throws OperationNotSupportedException {
@@ -62,7 +65,7 @@ public class CustomerView{
     }
 
     public void transaction() {
-        System.out.print("Do you wish to access your (1) savings or (0) current account: ");
+        System.out.print("Do you wish to access the (1) savings or (0) current account: ");
         int account_type = sc.nextInt();
         System.out.print("Do you wish to (1) withdraw or (0) deposit: ");
         int operation_type = sc.nextInt();
@@ -103,5 +106,16 @@ public class CustomerView{
             String converted_transaction = transaction.toString();
             System.out.println(converted_transaction);
         }
+    }
+
+    public void destroy()
+    {
+        ManageFileTXT customerReader = new ManageFileTXT();
+        List<String> list = new java.util.ArrayList<>(Collections.emptyList());
+        for (Customer customer: this.list_of_costumers){
+            customer.destroy();
+            list.add(customer.toString());
+        }
+        customerReader.write(list);
     }
 }

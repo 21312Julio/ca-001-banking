@@ -1,11 +1,7 @@
 package entities;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -22,7 +18,9 @@ public class ManageFileTXT {
     }
 
     public ManageFileTXT(String filename) {
+
         this.filename = filename;
+        this.create(path, this.filename);
     }
 
     public ManageFileTXT(String fName, String lName, String accountNumber, String pin, String accountType) {
@@ -50,7 +48,7 @@ public class ManageFileTXT {
 
     }
 
-    public void writerCustomer(List<String> content) {
+    public void write(List<String> content) {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.path+this.filename, true))) {
             for(String value : content) {
@@ -80,7 +78,7 @@ public class ManageFileTXT {
         return content;
     }
 
-    public void deleteFiles() {
+    public void deleteFile() {
         File file = new File(this.path+this.filename);
         if (file.delete()) {
             System.out.println("Deleted the file: " + file.getName());
